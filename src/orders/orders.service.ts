@@ -1,16 +1,23 @@
-import { HttpStatus, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { HttpStatus, Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { CreateOrderDto, ChangeOrderStatusDto } from "./dto";
 import { PrismaClient } from "@prisma/client";
-import { RpcException } from "@nestjs/microservices";
+import { ClientProxy, RpcException } from "@nestjs/microservices";
 import { OrderPaginationDto } from "./dto/order-pagination.dto";
+import { NATS_SERVICE } from "../config";
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger("OrdersService");
 
+  constructor(
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
+  ) {
+    super();
+  }
+
   async onModuleInit() {
     await this.$connect();
-    this.logger.log("Database connected");
+    this.logger.log('Database connected');
   }
 
   create(createOrderDto: CreateOrderDto) {
